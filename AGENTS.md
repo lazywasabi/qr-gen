@@ -10,7 +10,7 @@ This repository is a static Thai web app for generating QR codes. The main use c
 - Architecture: static HTML/CSS/JavaScript with separate same-folder CSS and JS files
 - Package manager preference: use `pnpm` for Node/package commands, never `npm`
 - Visual style: clean, modern, minimal, mobile-first
-- Runtime assets: `index.html` loads Google Fonts, `qrcodejs@1.0.0`, and Lucide static SVGs from CDNs, plus local favicon and PromptPay icon assets.
+- Runtime assets: `index.html` loads Google Fonts, `qrcodejs@1.0.0`, and Lucide static SVGs from CDNs, plus local assets with `favicon.ico` at the repo root and the SVG favicon and PromptPay icon under `assets/icons/`.
 - Icons: use static Lucide assets, for example `https://cdn.jsdelivr.net/npm/lucide-static@1.17.0/icons/check.svg`
 - PromptPay implementation reference: use the project-local `promptpay-qr` skill at `.agents/skills/promptpay-qr` for EMV TLV fields, PromptPay identifier rules, amount behavior, CRC rules, and validation expectations.
 
@@ -43,7 +43,7 @@ This repository is a static Thai web app for generating QR codes. The main use c
 - Avoid marketing-page structure; the first screen should be the usable QR tool.
 - Keep the QR code large, centered, high contrast, and free from overlapping UI.
 - Use icon buttons for compact actions. Prefer Lucide static SVG files loaded with `<img>`.
-- The PromptPay type toggle uses the local `thai-qr-payment-icon-bw.svg` asset.
+- The PromptPay type toggle uses the local `assets/icons/thai-qr-payment-icon-bw.svg` asset.
 - Keep the visual direction clean, modern, minimal, and practical.
 - Avoid adding decorative complexity that competes with the QR code.
 
