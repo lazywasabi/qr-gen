@@ -12,12 +12,12 @@ This repository is a static Thai web app for generating QR codes. The main use c
 - Visual style: clean, modern, minimal, mobile-first
 - Runtime assets: `index.html` loads Google Fonts, `qrcodejs@1.0.0`, and Lucide static SVGs from CDNs, plus local favicon and PromptPay icon assets.
 - Icons: use static Lucide assets, for example `https://cdn.jsdelivr.net/npm/lucide-static@1.17.0/icons/check.svg`
-- PromptPay implementation reference: use the project-local `promptpay-qr` skill at `.codex/skills/promptpay-qr` for EMV TLV fields, PromptPay identifier rules, amount behavior, CRC rules, and validation expectations.
+- PromptPay implementation reference: use the project-local `promptpay-qr` skill at `.agents/skills/promptpay-qr` for EMV TLV fields, PromptPay identifier rules, amount behavior, CRC rules, and validation expectations.
 
 ## Current Behavior
 
 - Supports two QR modes:
-  - PromptPay: accepts a Thai mobile number or Thai national ID / tax ID, with optional amount.
+  - PromptPay: accepts a Thai mobile number, Thai national ID / tax ID, or e-wallet ID, with optional amount.
   - Generic: accepts freeform text or a URL.
 - If PromptPay amount is omitted, the payer's banking app should prompt for the amount.
 - Supports URL prefill via query params:
@@ -49,7 +49,8 @@ This repository is a static Thai web app for generating QR codes. The main use c
 
 ## Validation Expectations
 
-- For PromptPay validation and payload expectations, use `.codex/skills/promptpay-qr/references/promptpay-emv.md`.
+- For PromptPay validation and payload expectations, use `.agents/skills/promptpay-qr/references/promptpay-emv.md`.
+- PromptPay account input accepts valid Thai mobile numbers, any 13-digit national ID / tax ID, or a 15-digit e-wallet ID.
 - Generic text should be non-empty and limited to 300 characters.
 - In generic view mode, show the text below the QR; if it is an absolute `http`/`https` URL, render it as a clickable link.
 - For filenames, use `qr-code.png` for generic QR, `qr-promptpay-[id].png` for PromptPay without amount, and `qr-promptpay-[id]-[amount].png` for PromptPay with amount.

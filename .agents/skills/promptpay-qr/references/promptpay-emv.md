@@ -20,7 +20,8 @@ Sources:
   - sub-tag `00` AID: `A000000677010111` for standard merchant-presented PromptPay.
   - sub-tag `01` mobile number: 13 digits in `0066XXXXXXXXX` form, converted from a Thai `0XXXXXXXXX` mobile number.
   - sub-tag `02` national ID / tax ID: 13 digits.
-  - Other PromptPay identifiers exist, such as e-wallet and bank account, but the current app only supports mobile number and 13-digit ID.
+  - sub-tag `03` e-wallet ID: 15 digits.
+  - Other PromptPay identifiers exist, such as bank account, but the current app only supports mobile number, 13-digit ID, and 15-digit e-wallet ID.
 - `53` Transaction Currency: `764` for Thai baht.
 - `54` Transaction Amount: optional, formatted as decimal with up to 2 fractional digits; omit this tag when the amount should be entered by the payer.
 - `58` Country Code: `TH`.
@@ -43,7 +44,7 @@ Preserve this order for compatibility unless a spec-driven change requires other
 ## Validation Expectations
 
 - Phone input should normalize only a valid Thai mobile number pattern: 10 digits beginning with `06`, `08`, or `09`.
-- National ID / tax ID input should accept exactly 13 digits and pass the Thai citizen ID checksum.
+- National ID / tax ID input should accept any 13 digits. Do not enforce Thai citizen ID checksum because tax IDs use the same length.
+- E-wallet input should accept exactly 15 digits and emit sub-tag `03`.
 - Amount should be blank or greater than 0 with no more than 2 decimal places.
-- When changing QR generation code, test at least one phone-number payload and one 13-digit ID payload.
-
+- When changing QR generation code, test at least one phone-number payload, one 13-digit ID payload, and one 15-digit e-wallet payload.

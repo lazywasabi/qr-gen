@@ -1,4 +1,5 @@
 const PROMPTPAY_AID = "A000000677010111";
+const PROMPTPAY_ACCOUNT_ERROR = "หมายเลขบัญชีไม่ถูกต้อง";
 const GENERIC_TEXT_LIMIT = 300;
 const MAX_AMOUNT = 9999999.99;
 const QR_PLACEHOLDER = '<div class="qr-placeholder"></div>';
@@ -64,18 +65,6 @@ function onlyDigits(value) {
   return String(value || "").replace(/\D/g, "");
 }
 
-function isValidThaiCitizenId(digits) {
-  if (!/^\d{13}$/.test(digits)) return false;
-
-  const sum = digits
-    .slice(0, 12)
-    .split("")
-    .reduce((total, digit, index) => total + Number(digit) * (13 - index), 0);
-  const checksum = (11 - (sum % 11)) % 10;
-
-  return checksum === Number(digits[12]);
-}
-
 function normalizePromptPayId(rawValue) {
   const digits = onlyDigits(rawValue);
 
@@ -87,7 +76,7 @@ function normalizePromptPayId(rawValue) {
     };
   }
 
-  if (isValidThaiCitizenId(digits)) {
+  if (/^\d{13}$/.test(digits)) {
     return {
       label: digits.replace(/(\d)(\d{4})(\d{5})(\d{2})(\d)/, "$1-$2-$3-$4-$5"),
       type: "02",
@@ -95,7 +84,15 @@ function normalizePromptPayId(rawValue) {
     };
   }
 
-  throw new Error("หมายเลขโทรศัพท์หรือบัตรประชาชนไม่ถูกต้อง");
+  if (/^\d{15}$/.test(digits)) {
+    return {
+      label: digits.replace(/(\d{3})(\d{4})(\d{4})(\d{4})/, "$1-$2-$3-$4"),
+      type: "03",
+      value: digits
+    };
+  }
+
+  throw new Error(PROMPTPAY_ACCOUNT_ERROR);
 }
 
 function normalizeAmount(rawValue) {
