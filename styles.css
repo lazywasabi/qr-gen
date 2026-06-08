@@ -327,6 +327,24 @@ textarea:focus {
   height: 1.25em;
 }
 
+.source-link {
+  position: fixed;
+  right: max(0.75rem, env(safe-area-inset-right));
+  top: max(0.625rem, env(safe-area-inset-top));
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  text-decoration: none;
+  opacity: 0.72;
+  transition: color 140ms ease, opacity 140ms ease;
+}
+
+.source-link:hover {
+  color: var(--focus);
+  opacity: 1;
+  text-decoration: underline;
+}
+
 @media (min-width: 47.5em) {
   :root {
     --info-slot-size: 10.75rem;
