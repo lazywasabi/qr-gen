@@ -66,10 +66,6 @@ function onlyDigits(value) {
   return String(value || "").replace(/\D/g, "");
 }
 
-function sanitizePromptPayIdInput(value) {
-  return String(value || "").replace(/\D/g, "");
-}
-
 function sanitizeAmountInput(value) {
   let cleaned = String(value || "").replace(/[^0-9.]/g, "");
   const dotIndex = cleaned.indexOf(".");
@@ -291,9 +287,7 @@ function updateDisplayVisibility() {
 }
 
 function resetDisplay() {
-  dom.displayId.textContent = "";
-  dom.displayAmount.textContent = "";
-  dom.displayAmount.classList.add("small");
+  clearPromptPayDisplay();
   clearGenericDisplay();
   updateDisplayVisibility();
 }
@@ -609,7 +603,7 @@ function prefillFromUrl() {
     dom.genericTextInput.value = text;
     setQrType(QR_TYPES.generic);
   } else {
-    if (id !== null) dom.idInput.value = sanitizePromptPayIdInput(id);
+    if (id !== null) dom.idInput.value = onlyDigits(id);
     if (amount !== null) dom.amountInput.value = sanitizeAmountInput(amount);
     setQrType(QR_TYPES.promptpay);
   }
@@ -645,7 +639,7 @@ function bindEvents() {
   });
 
   dom.idInput.addEventListener("input", () => {
-    sanitizeInput(dom.idInput, sanitizePromptPayIdInput);
+    sanitizeInput(dom.idInput, onlyDigits);
     updateQr();
   });
   dom.amountInput.addEventListener("input", () => {
