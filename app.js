@@ -54,7 +54,8 @@ const state = {
   currentPayload: "",
   currentShareUrl: "",
   currentQrType: QR_TYPES.promptpay,
-  isEditing: false
+  isEditing: false,
+  invalidInput: null
 };
 
 function tlv(id, value) {
@@ -228,6 +229,9 @@ function isHttpUrl(value) {
 }
 
 function getActiveInput() {
+  if (state.invalidInput) {
+    return state.invalidInput;
+  }
   return state.currentQrType === QR_TYPES.generic ? dom.genericTextInput : dom.idInput;
 }
 
@@ -404,7 +408,14 @@ function updatePromptPayQr() {
     return false;
   }
 
-  const result = buildPromptPayPayload(dom.idInput.value, dom.amountInput.value);
+  let result;
+  try {
+    result = buildPromptPayPayload(dom.idInput.value, dom.amountInput.value);
+  } catch (error) {
+    error.input = error.message === PROMPTPAY_ACCOUNT_ERROR ? dom.idInput : dom.amountInput;
+    throw error;
+  }
+
   const rendered = renderQr(result.payload);
 
   dom.displayId.textContent = result.targetLabel;
@@ -429,7 +440,14 @@ function updateGenericQr() {
     return false;
   }
 
-  const text = normalizeGenericText(dom.genericTextInput.value);
+  let text;
+  try {
+    text = normalizeGenericText(dom.genericTextInput.value);
+  } catch (error) {
+    error.input = dom.genericTextInput;
+    throw error;
+  }
+
   const rendered = renderQr(text);
 
   clearPromptPayDisplay();
@@ -453,13 +471,19 @@ function updateGenericQr() {
 
 function updateQr() {
   dom.errorNode.textContent = "";
+  state.invalidInput = null;
   syncUrlState();
 
   try {
-    return state.currentQrType === QR_TYPES.generic ? updateGenericQr() : updatePromptPayQr();
+    const isValid = state.currentQrType === QR_TYPES.generic ? updateGenericQr() : updatePromptPayQr();
+    if (!isValid) {
+      state.invalidInput = state.currentQrType === QR_TYPES.generic ? dom.genericTextInput : dom.idInput;
+    }
+    return isValid;
   } catch (error) {
     setPlaceholder();
     dom.errorNode.textContent = error.message;
+    state.invalidInput = error.input || (state.currentQrType === QR_TYPES.generic ? dom.genericTextInput : dom.idInput);
     return false;
   }
 }
@@ -603,9 +627,13 @@ function prefillFromUrl() {
 }
 
 function finishEditing() {
-  if (state.isEditing && updateQr()) {
-    commitAmount();
-    setEditing(false);
+  if (state.isEditing) {
+    if (updateQr()) {
+      commitAmount();
+      setEditing(false);
+    } else {
+      getActiveInput().focus();
+    }
   }
 }
 
