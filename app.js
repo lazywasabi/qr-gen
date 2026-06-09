@@ -65,6 +65,37 @@ function onlyDigits(value) {
   return String(value || "").replace(/\D/g, "");
 }
 
+function sanitizeInput(input, sanitizeFn) {
+  const originalVal = input.value;
+  const sanitizedVal = sanitizeFn(originalVal);
+
+  if (originalVal === sanitizedVal) {
+    return;
+  }
+
+  const start = input.selectionStart;
+  const end = input.selectionEnd;
+
+  let origIdx = 0;
+  let sanIdx = 0;
+  let newStart = 0;
+  let newEnd = 0;
+
+  while (origIdx < originalVal.length && sanIdx < sanitizedVal.length) {
+    if (originalVal[origIdx] === sanitizedVal[sanIdx]) {
+      if (origIdx < start) newStart++;
+      if (origIdx < end) newEnd++;
+      origIdx++;
+      sanIdx++;
+    } else {
+      origIdx++;
+    }
+  }
+
+  input.value = sanitizedVal;
+  input.setSelectionRange(newStart, newEnd);
+}
+
 function normalizePromptPayId(rawValue) {
   const digits = onlyDigits(rawValue);
 
@@ -309,7 +340,7 @@ function renderQr(payload) {
 
   try {
     const qr = qrcodegen.QrCode.encodeText(payload, qrcodegen.QrCode.Ecc.MEDIUM);
-    const border = 4;
+    const border = 2;
     const numModules = qr.size + border * 2;
     const scale = Math.max(1, Math.floor(640 / numModules));
     const canvasSize = numModules * scale;
@@ -574,8 +605,25 @@ function bindEvents() {
     finishEditing();
   });
 
-  dom.idInput.addEventListener("input", updateQr);
-  dom.amountInput.addEventListener("input", updateQr);
+  dom.idInput.addEventListener("input", () => {
+    sanitizeInput(dom.idInput, (val) => val.replace(/\D/g, ""));
+    updateQr();
+  });
+  dom.amountInput.addEventListener("input", () => {
+    sanitizeInput(dom.amountInput, (val) => {
+      let cleaned = val.replace(/[^0-9.]/g, "");
+      const dotIndex = cleaned.indexOf(".");
+      if (dotIndex !== -1) {
+        cleaned = cleaned.slice(0, dotIndex + 1) + cleaned.slice(dotIndex + 1).replace(/\./g, "");
+        const parts = cleaned.split(".");
+        if (parts[1] && parts[1].length > 2) {
+          cleaned = parts[0] + "." + parts[1].slice(0, 2);
+        }
+      }
+      return cleaned;
+    });
+    updateQr();
+  });
   dom.genericTextInput.addEventListener("input", updateQr);
   dom.downloadButton.addEventListener("click", downloadQr);
   dom.copyLinkButton.addEventListener("click", copyLink);
