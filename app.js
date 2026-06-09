@@ -306,25 +306,46 @@ function setPlaceholder() {
 function renderQr(payload) {
   dom.qrNode.replaceChildren();
 
-  if (typeof QRCode !== "function") {
+  if (typeof qrcodegen !== "object") {
     dom.qrNode.innerHTML = QR_PLACEHOLDER;
     return false;
   }
 
-  new QRCode(dom.qrNode, {
-    text: payload,
-    width: 640,
-    height: 640,
-    colorDark: "#111827",
-    colorLight: "#ffffff",
-    correctLevel: QRCode.CorrectLevel.M
-  });
+  try {
+    const qr = qrcodegen.QrCode.encodeText(payload, qrcodegen.QrCode.Ecc.MEDIUM);
+    const border = 4;
+    const numModules = qr.size + border * 2;
+    const scale = Math.max(1, Math.floor(640 / numModules));
+    const canvasSize = numModules * scale;
 
-  dom.qrNode.removeAttribute("title");
-  dom.qrNode.querySelectorAll("[title]").forEach((node) => node.removeAttribute("title"));
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
+    const ctx = canvas.getContext("2d");
 
-  return true;
+    // Paint background light color
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+    // Paint dark modules
+    ctx.fillStyle = "#111827";
+    for (let y = 0; y < qr.size; y++) {
+      for (let x = 0; x < qr.size; x++) {
+        if (qr.getModule(x, y)) {
+          ctx.fillRect((x + border) * scale, (y + border) * scale, scale, scale);
+        }
+      }
+    }
+
+    dom.qrNode.appendChild(canvas);
+    return true;
+  } catch (error) {
+    console.error("QR Code generation failed:", error);
+    dom.qrNode.innerHTML = QR_PLACEHOLDER;
+    return false;
+  }
 }
+
 
 function applyRenderedQr(payload, rendered) {
   state.currentPayload = payload;

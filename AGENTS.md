@@ -10,7 +10,7 @@ This repository is a static Thai web app for generating QR codes. The main use c
 - Architecture: static HTML/CSS/JavaScript with separate same-folder CSS and JS files
 - Package manager preference: use `pnpm` for Node/package commands, never `npm`
 - Visual style: clean, modern, minimal, mobile-first
-- Runtime assets: `index.html` loads Google Fonts, `qrcodejs@1.0.0`, and Lucide static SVGs from CDNs, plus local assets with `favicon.ico` at the repo root and the SVG favicon and PromptPay icon under `assets/icons/`.
+- Runtime assets: `index.html` loads Google Fonts and Lucide static SVGs from CDNs, plus local assets with `favicon.ico` at the repo root, the SVG favicon and PromptPay icon under `assets/icons/`, and the local `assets/qrcodegen.min.js` (compiled and minified from Nayuki's QR Code generator library).
 - Icons: use static Lucide assets, for example `https://cdn.jsdelivr.net/npm/lucide-static@1.17.0/icons/check.svg`
 - PromptPay implementation reference: use the project-local `promptpay-qr` skill at `.agents/skills/promptpay-qr` for EMV TLV fields, PromptPay identifier rules, amount behavior, CRC rules, and validation expectations.
 
@@ -31,7 +31,7 @@ This repository is a static Thai web app for generating QR codes. The main use c
 ## Development Workflow
 
 - No install step is required for the current app.
-- Open `index.html` directly in a browser for quick manual checks. A network connection is needed for CDN-loaded QR generation, icons, and fonts unless those assets are cached.
+- Open `index.html` directly in a browser for quick manual checks. A network connection is needed for CDN-loaded icons and fonts unless those assets are cached. (QR generation is now fully client-side and offline via local `assets/qrcodegen.min.js`).
 - If a local HTTP server is needed, prefer a `pnpm` command such as `pnpm dlx serve .` or another lightweight static server available in the workspace.
 - Keep the app static and no-build unless the user explicitly asks for a build system or the app clearly outgrows this structure.
 - After UI changes, check both a narrow mobile viewport and a desktop viewport. The mobile QR display is the primary experience.
