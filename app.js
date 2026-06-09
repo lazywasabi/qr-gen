@@ -249,19 +249,12 @@ function setActionButtonsEnabled(hasImage, hasLink = hasImage) {
   dom.copyLinkButton.disabled = !hasLink;
 }
 
-function setPromptPaySearchParams(url, options = {}) {
+function setPromptPaySearchParams(url) {
   const id = getTrimmedValue(dom.idInput);
   const amountRaw = getTrimmedValue(dom.amountInput);
 
   if (id) url.searchParams.set("id", id);
-  if (!amountRaw) return;
-
-  try {
-    const amount = normalizeAmount(amountRaw);
-    if (amount) url.searchParams.set("amount", amount);
-  } catch (error) {
-    if (options.throwOnInvalidAmount) throw error;
-  }
+  if (amountRaw) url.searchParams.set("amount", amountRaw);
 }
 
 function setGenericSearchParams(url) {
@@ -269,14 +262,14 @@ function setGenericSearchParams(url) {
   if (text) url.searchParams.set("text", text);
 }
 
-function makeUrlFromInputs(options = {}) {
+function makeUrlFromInputs() {
   const url = new URL(window.location.href);
   url.search = "";
 
   if (state.currentQrType === QR_TYPES.generic) {
     setGenericSearchParams(url);
   } else {
-    setPromptPaySearchParams(url, options);
+    setPromptPaySearchParams(url);
   }
 
   return url.toString();
@@ -397,7 +390,7 @@ function renderQr(payload) {
 
 function applyRenderedQr(payload, rendered) {
   state.currentPayload = payload;
-  state.currentShareUrl = makeUrlFromInputs({ throwOnInvalidAmount: true });
+  state.currentShareUrl = makeUrlFromInputs();
   setActionButtonsEnabled(rendered, true);
   history.replaceState(null, "", state.currentShareUrl);
 }
@@ -490,6 +483,7 @@ function updateQr() {
 
 function commitAmount() {
   dom.amountInput.value = normalizeAmount(dom.amountInput.value);
+  syncUrlState();
 }
 
 let copyTimeout;
