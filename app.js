@@ -170,10 +170,6 @@ function normalizeGenericText(rawValue) {
   return text;
 }
 
-function encodeQrText(value) {
-  return unescape(encodeURIComponent(value));
-}
-
 function isHttpUrl(value) {
   try {
     const url = new URL(value);
@@ -386,7 +382,7 @@ function updateGenericQr() {
   }
 
   const text = normalizeGenericText(dom.genericTextInput.value);
-  const rendered = renderQr(encodeQrText(text));
+  const rendered = renderQr(text);
 
   clearPromptPayDisplay();
   clearGenericDisplay();
