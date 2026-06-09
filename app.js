@@ -65,6 +65,23 @@ function onlyDigits(value) {
   return String(value || "").replace(/\D/g, "");
 }
 
+function sanitizePromptPayIdInput(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+function sanitizeAmountInput(value) {
+  let cleaned = String(value || "").replace(/[^0-9.]/g, "");
+  const dotIndex = cleaned.indexOf(".");
+  if (dotIndex !== -1) {
+    cleaned = cleaned.slice(0, dotIndex + 1) + cleaned.slice(dotIndex + 1).replace(/\./g, "");
+    const parts = cleaned.split(".");
+    if (parts[1] && parts[1].length > 2) {
+      cleaned = parts[0] + "." + parts[1].slice(0, 2);
+    }
+  }
+  return cleaned;
+}
+
 function sanitizeInput(input, sanitizeFn) {
   const originalVal = input.value;
   const sanitizedVal = sanitizeFn(originalVal);
@@ -574,8 +591,8 @@ function prefillFromUrl() {
     dom.genericTextInput.value = text;
     setQrType(QR_TYPES.generic);
   } else {
-    if (id !== null) dom.idInput.value = id;
-    if (amount !== null) dom.amountInput.value = amount;
+    if (id !== null) dom.idInput.value = sanitizePromptPayIdInput(id);
+    if (amount !== null) dom.amountInput.value = sanitizeAmountInput(amount);
     setQrType(QR_TYPES.promptpay);
   }
 
@@ -606,22 +623,11 @@ function bindEvents() {
   });
 
   dom.idInput.addEventListener("input", () => {
-    sanitizeInput(dom.idInput, (val) => val.replace(/\D/g, ""));
+    sanitizeInput(dom.idInput, sanitizePromptPayIdInput);
     updateQr();
   });
   dom.amountInput.addEventListener("input", () => {
-    sanitizeInput(dom.amountInput, (val) => {
-      let cleaned = val.replace(/[^0-9.]/g, "");
-      const dotIndex = cleaned.indexOf(".");
-      if (dotIndex !== -1) {
-        cleaned = cleaned.slice(0, dotIndex + 1) + cleaned.slice(dotIndex + 1).replace(/\./g, "");
-        const parts = cleaned.split(".");
-        if (parts[1] && parts[1].length > 2) {
-          cleaned = parts[0] + "." + parts[1].slice(0, 2);
-        }
-      }
-      return cleaned;
-    });
+    sanitizeInput(dom.amountInput, sanitizeAmountInput);
     updateQr();
   });
   dom.genericTextInput.addEventListener("input", updateQr);
