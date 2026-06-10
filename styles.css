@@ -1,3 +1,12 @@
+@font-face {
+  font-family: "Noto Sans Thai";
+  src: url("assets/NotoSansThai[wght].woff2") format("woff2-variations"),
+       url("assets/NotoSansThai[wght].woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
   --bg: #f6f8f7;
