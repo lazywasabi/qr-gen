@@ -7,6 +7,7 @@ Sources:
 - EMVCo QR Code overview: https://www.emvco.com/emv-technologies/qr-codes/
 - Bank of Thailand Thai QR Payment Standard: https://www.bot.or.th/content/dam/bot/documents/th/our-roles/payment-systems/about-payment-systems/ThaiQRCode_Payment_Standard.pdf
 - `thai-qr-payment` implementation reference: https://thai-qr-payment.js.org/th/reference/spec/
+- `promptpay-qrcode` Structure Deep Dive: https://github.com/devhyphenplus/promptpay-qrcode/blob/main/docs/promptpay-qr-structure.md
 
 ## Payload Rules
 
@@ -26,6 +27,33 @@ Sources:
 - `54` Transaction Amount: optional, formatted as decimal with up to 2 fractional digits; omit this tag when the amount should be entered by the payer.
 - `58` Country Code: `TH`.
 - `63` CRC: CRC-16/CCITT-FALSE, calculated over the payload plus `6304`, then emitted as four uppercase hex characters.
+  - Parameters: Polynomial `0x1021`, Initial `0xFFFF`, No Input/Output Reflection, No Final XOR.
+  - Test vector: `CRC("123456789") = 0x29B1`.
+
+## Reference Data for Other PromptPay Layouts (Not currently implemented)
+
+The following formats are defined under the Bank of Thailand QR standard but are not currently supported by this app:
+
+### Tag 29 — Credit Transfer (Other Identifiers)
+- sub-tag `04` bank account: up to 43 alphanumeric characters (3-digit bank code + account number).
+- sub-tag `05` OTA (One-Time Authorization): 10 characters, mandatory when customer-presented AID (`A000000677010114`) is used.
+
+### Tag 30 — Bill Payment (Merchant-Presented)
+Nested template containing:
+- sub-tag `00` AID: `A000000677010112` for domestic bill payment, or `A000000677012006` for cross-border bill payment.
+- sub-tag `01` Biller ID: 15 digits (13-digit Tax ID + 2-digit suffix). Bank-assigned, mandatory.
+- sub-tag `02` Reference 1: alphanumeric, up to 20 characters. Biller-defined customer/invoice ID, mandatory.
+- sub-tag `03` Reference 2: alphanumeric, up to 20 characters. Secondary reference (e.g., branch, order ID), optional.
+
+### Tag 31 — Payment Innovation
+Nested template containing:
+- sub-tag `00` AID: `A000000677012004` (official BOT API standard) or `A000000677010113` (vendor-specific KBank/KShop standard).
+
+## Point of Initiation Method Nuances (Tag 01)
+
+- Tag `01` signals the intent of the merchant (static `11` vs dynamic `12`).
+- A dynamic QR payload (`12`) is physically reusable because it does not carry a nonce, counter, or expiry at the QR string level. Whether it is reusable in practice is determined by the bank's processing backend.
+- Omit the amount tag (`54`) for static payment (`11`). A fixed amount can be used under either `11` or `12` depending on issuer compatibility (some apps, like K PLUS, have been reported to reject `12` in certain contexts).
 
 ## Current App Ordering
 
